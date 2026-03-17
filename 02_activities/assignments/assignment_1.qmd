@@ -86,19 +86,15 @@ freq <- fread("./02_activities/data/gwa_qc_A1_freq.afreq")
 head(freq)
 ```
 
-#All of these allele frequencies are below 0.5, which means they represent the minor allele frequencies for these SNPs.
-#Therefore, the major allele frequencies are:
-#rs1861: 1-0.0539859=0.9460141
-#rs3813199:1-0.0569126=0.9430874
-#rs3128342:1-0.305121=0.694879
-#rs11804831: 1-0.154341=0.845659 
+All of these allele frequencies are below 0.5, which means they represent the minor allele frequencies for these SNPs.
+
+Therefore, the major allele frequencies are:
+
+rs1861: 1-0.0539859=0.9460141, rs3813199:1-0.0569126=0.9430874, rs3128342:1-0.305121=0.694879, rs11804831: 1-0.154341=0.845659 
 
 (ii) What are the minor allele frequencies (MAFs) for these four SNPs?
 #From the frequencies calculated in the previous code, the minor allele frequencies are:
-#rs1861: 0.0539859
-#rs3813199:0.0569126
-#rs3128342:0.305121
-#rs11804831: 0.154341
+rs1861: 0.0539859, rs3813199:0.0569126, rs3128342:0.305121, rs11804831: 0.154341
 
 #### Question 3: Hardy–Weinberg Equilibrium (HWE) Test
 
@@ -109,7 +105,6 @@ head(freq)
 plink2 --bfile ./02_activities/data/gwa.qc.A1 --hardy --out ./02_activities/data/gwa_qc_A1_hwe
 ```
 ```{r,message=FALSE, warning=FALSE}
-# View HWE results
 hwe <- fread("./02_activities/data/gwa_qc_A1_hwe.hardy")
 head(hwe)
 ```
@@ -124,21 +119,18 @@ plink2 --bfile ./02_activities/data/gwa.qc.A1 \
 ```
 
 ```{r,message=FALSE, warning=FALSE}
-# View HWE results
 hwesnplist <- fread("./02_activities/data/gwa_qc_A1_hwe_snplist.hardy")
 head(hwesnplist)
 ```
 
-The P-values for rs1861, rs3813199, rs3128342, and #rs11804831 are:
-#rs1861: 0.274719
-#rs3813199: 1
-#rs3128342:0.330273
-#rs11804831: 0.113354
+The P-values for rs1861, rs3813199, rs3128342, and rs11804831 are:
+
+rs1861: 0.274719, rs3813199: 1, rs3128342:0.330273, rs11804831: 0.113354
+
 #### Question 4: Genetic Association Test
 
 (i) Conduct a linear regression to test the association between SNP rs1861 and the phenotype. What is the p-value?
 ```{r}
-# Load genotype data
 geno_subset <- fread("./02_activities/data/geno.additive.raw")
 geno_subset=na.omit(geno_subset)
 geno_subset$PHENOTYPE=geno_subset$PHENOTYPE-1
@@ -147,16 +139,13 @@ head(geno_subset)
 ```
 
 ```{r,message=FALSE, warning=FALSE}
-#Pick SNP rs1861
 table(geno_subset$rs1861_C)
 freq[freq$ID=='rs1861',]
 ```
 
 ```{r,message=FALSE, warning=FALSE}
-# Fit linear regression model
 model <- glm(PHENOTYPE ~ rs1861_C, data = geno_subset, family = gaussian)
 
-# View model summary
 summary(model)
 
 ```
@@ -172,49 +161,38 @@ The P value is 2e-16.
 
          
 ```{r,message=FALSE, warning=FALSE}
-# Make prediction over continuous range (for smooth curve)
-# Create a new data frame containing a sequence of genotype values
  geno_range <- data.frame(
    rs1861_C = seq(0, 2, length.out = 100)
  )
-# Use the fitted logistic regression model to predict phenotype probability
-# for each genotype value in geno_range
+
  geno_range$predicted_prob <- predict(model, newdata = geno_range, type = "response")
 
-# Start from the observed genotype dataset
 count_data <- geno_subset %>%
-# Remove rows with missing genotype or missing phenotype
   filter(!is.na(rs1861_C), !is.na(PHENOTYPE)) %>%
- # Group data by genotype value and phenotype category 
   group_by(rs1861_C, PHENOTYPE) %>%
-# Count how many observations fall into each genotype-phenotype combination
   summarise(count = n(), .groups = "drop")
   print (count_data)
 
-# Start building the plot
 p1=ggplot() +
   geom_point(
     data = count_data,
     aes(x = rs1861_C, y = PHENOTYPE, size = count),
     color = "blue"
   ) +
-  geom_line(# Use the prediction data frame for the line
+  geom_line(
     data = geno_range,
     aes(x = rs1861_C, y = predicted_prob),
     color = "red",
-    # Set line thickness
     size = 1.2
   ) +
-  # Control the size range of the points
   scale_size_continuous(range = c(2, 10)) +
   labs(
     title = "Linear Regression: PHENOTYPE ~ Genotype",
     x = "Genotype (0/1/2)",
     y = "Phenotype ", size = "Count"
   ) +
-  # Restrict the visible x- and y-axis range
+
   coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-2.7, 4.5)) +
-   # Apply a minimal theme for a clean appearance
   theme_minimal()
   
   
@@ -226,7 +204,7 @@ ggsave("./02_activities/data/p1_plotA1.png", plot = p1, width = 7, height = 5, d
 (iv) Convert the genotype coding for rs1861 to recessive coding.
 
 ```{r}
-geno_subset_rec <- geno_subset  # make a copy
+geno_subset_rec <- geno_subset  
 geno_subset_rec[, 7:ncol(geno_subset_rec)] <- as.data.frame(
   lapply(geno_subset[, 7:ncol(geno_subset)], function(x) ifelse(x == 2, 1, 0))
 )
@@ -238,7 +216,9 @@ geno_subset_rec[, 7:ncol(geno_subset_rec)] <- as.data.frame(
 model <- glm(PHENOTYPE ~ rs1861_C, data = geno_subset_rec, family = gaussian)
 summary(model)         
 ```
-#The p-value is 2e-16.
+
+The p-value is 2e-16.
+
 (vi) Plot the scatterplot of phenotype versus the recessive-coded genotype of rs1861. Add the regression line to the plot.
 
 ```{r}     
@@ -282,7 +262,7 @@ ggsave("./02_activities/data/p2_plotA1.png", plot = p2, width = 7, height = 5, d
 
 (vii) Which model fits better? Justify your answer.
          
-#The additive model fits better for this SNP. The AIC value for the additive model (10988) is slightly lower than the AIC value for the recessive model (11000). In addition, the additive model shows that the aa genotype has a case phenotype frequency less than 1.0 with only an n=14. When using recessive coding, the "0" includes heterozygotes which pushes that phenotypic frequency much higher than in the additive model. This could be inflating the influence of the aa genotype by combining it with the heterozygotes which have a higher phenotypic frequency when viewed through the additive model.
+The additive model fits better for this SNP. The AIC value for the additive model (10988) is slightly lower than the AIC value for the recessive model (11000). In addition, the additive model shows that the aa genotype has a case phenotype frequency less than 1.0 with only an n=14. When using recessive coding, the "0" includes heterozygotes which pushes that phenotypic frequency much higher than in the additive model. This could be inflating the influence of the aa genotype by combining it with the heterozygotes which have a higher phenotypic frequency when viewed through the additive model.
 
 
 ### Criteria
