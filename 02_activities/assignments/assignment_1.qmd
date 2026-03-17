@@ -213,7 +213,7 @@ p1=ggplot() +
     y = "Phenotype ", size = "Count"
   ) +
   # Restrict the visible x- and y-axis range
-  coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-0.1, 4.5)) +
+  coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-2.7, 4.5)) +
    # Apply a minimal theme for a clean appearance
   theme_minimal()
   
@@ -272,7 +272,7 @@ p2=ggplot() +
     x = "Genotype (0/1)",
     y = "Phenotype ", size = "Count"
   ) +
-  coord_cartesian(xlim = c(-0.5, 1.5), ylim = c(-0.1, 4.5)) +
+  coord_cartesian(xlim = c(-0.5, 1.5), ylim = c(-2.7, 4.5)) +
   theme_minimal()
 
 print(p2)
@@ -282,7 +282,7 @@ ggsave("./02_activities/data/p2_plotA1.png", plot = p2, width = 7, height = 5, d
 
 (vii) Which model fits better? Justify your answer.
          
-#The additive model fits better for this SNP. The AIC value for the additive model (10988) is slightly lower than the AIC value for the recessive model (11000). In addition, the additive model shows that the aa genotype has a case phenotype frequency less than 1.0 with only an n=14. When using recessive coding, the "0" includes heterozygotes which pushes that phenotypic frequency much higher than in the additive model. This could be conflating the influence of the aa genotype by combining it with the heterozygotes which have a higher phenotypic frequency when viewed through the additive model.
+#The additive model fits better for this SNP. The AIC value for the additive model (10988) is slightly lower than the AIC value for the recessive model (11000). In addition, the additive model shows that the aa genotype has a case phenotype frequency less than 1.0 with only an n=14. When using recessive coding, the "0" includes heterozygotes which pushes that phenotypic frequency much higher than in the additive model. This could be inflating the influence of the aa genotype by combining it with the heterozygotes which have a higher phenotypic frequency when viewed through the additive model.
 
 
 ### Criteria
