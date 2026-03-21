@@ -62,7 +62,7 @@ Continuous variable type.
 ```         
 # Your answer here...
 ```{bash}
-head ./02_activities/data/gwa.qc.bim
+head ./02_activities/data/gwa.qc.A1.bim
 wc --lines ./02_activities/data/gwa.qc.A1.bim
 ```
 There are 101083 SNPs.
@@ -72,12 +72,10 @@ There are 101083 SNPs.
 (i) Load the genotype matrix for SNPs rs1861, rs3813199, rs3128342, and rs11804831 using additive coding. What are the allele frequencies (AFs) for these four SNPs?
 
 ```{bash,message=FALSE, warning=FALSE}
-setopt interactivecomments
 printf "%s\n" rs1861 rs3813199 rs3128342 rs11804831 > ./02_activities/data/snplist.txt
 ```{bash, results='hide',message=FALSE, warning=FALSE}
 plink2 --bfile ./02_activities/data/gwa.qc.A1 \
       --extract ./02_activities/data/snplist.txt \
-      --recode A \
         --freq --out ./02_activities/data/gwa_qc_A1_freq
 ```
 
@@ -114,7 +112,6 @@ head(hwe)
 ```{bash,message=FALSE, warning=FALSE}
 plink2 --bfile ./02_activities/data/gwa.qc.A1 \
       --extract ./02_activities/data/snplist.txt \
-      --recode A \
         --hardy --out ./02_activities/data/gwa_qc_A1_hwe_snplist
 ```
 
@@ -130,17 +127,18 @@ rs1861: 0.274719, rs3813199: 1, rs3128342:0.330273, rs11804831: 0.113354
 #### Question 4: Genetic Association Test
 
 (i) Conduct a linear regression to test the association between SNP rs1861 and the phenotype. What is the p-value?
-```{r}
-geno_subset <- fread("./02_activities/data/geno.additive.raw")
-geno_subset=na.omit(geno_subset)
-geno_subset$PHENOTYPE=geno_subset$PHENOTYPE-1
-head(geno_subset)
 
+```{bash,message=FALSE, warning=FALSE}
+printf "%s\n" rs1861 > ./02_activities/data/target.txt
+plink2 --bfile ./02_activities/data/gwa.qc.A1 \
+      --extract ./02_activities/data/target.txt \
+      --recode A \
+      --out ./02_activities/data/geno.additive.target
 ```
 
-```{r,message=FALSE, warning=FALSE}
-table(geno_subset$rs1861_C)
-freq[freq$ID=='rs1861',]
+```{r}
+geno_subset <- fread("./02_activities/data/geno.additive.target.raw")
+geno_subset=na.omit(geno_subset)
 ```
 
 ```{r,message=FALSE, warning=FALSE}
@@ -154,7 +152,7 @@ The P value is 2e-16.
 
 (ii) How would you interpret the beta coefficient from this regression?
          
-#Because the p value is small, there is an association between having the C allele and the case phenotype.The positive value of the coefficient indicates that each additional C allele at this position increases the odds of the individual being a case.
+#Because the p value is small, there is an association between having the C allele and an increased expression of the phenotype.The positive value of the coefficient indicates that each additional C allele at this position increases the odds of the individual having a more intensely expressed phenotype for this trait.
 
 
 (iii) Plot the scatterplot of phenotype versus the genotype of SNP rs1861. Add the regression line to the plot.
@@ -168,11 +166,11 @@ The P value is 2e-16.
  geno_range$predicted_prob <- predict(model, newdata = geno_range, type = "response")
 
 count_data <- geno_subset %>%
-  filter(!is.na(rs1861_C), !is.na(PHENOTYPE)) %>%
   group_by(rs1861_C, PHENOTYPE) %>%
   summarise(count = n(), .groups = "drop")
   print (count_data)
-
+```
+```{r,message=FALSE, warning=FALSE}
 p1=ggplot() +
   geom_point(
     data = count_data,
@@ -192,7 +190,7 @@ p1=ggplot() +
     y = "Phenotype ", size = "Count"
   ) +
 
-  coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-2.7, 4.5)) +
+  coord_cartesian(xlim = c(-0.5, 2.5), ylim = c(-2.7, 5.5)) +
   theme_minimal()
   
   
@@ -208,6 +206,7 @@ geno_subset_rec <- geno_subset
 geno_subset_rec[, 7:ncol(geno_subset_rec)] <- as.data.frame(
   lapply(geno_subset[, 7:ncol(geno_subset)], function(x) ifelse(x == 2, 1, 0))
 )
+head(geno_subset_rec)
 ```
 
 (v) Conduct a linear regression to test the association between the recessive-coded rs1861 and the phenotype. What is the p-value?
@@ -252,7 +251,7 @@ p2=ggplot() +
     x = "Genotype (0/1)",
     y = "Phenotype ", size = "Count"
   ) +
-  coord_cartesian(xlim = c(-0.5, 1.5), ylim = c(-2.7, 4.5)) +
+  coord_cartesian(xlim = c(-0.5, 1.5), ylim = c(-2.7, 5.5)) +
   theme_minimal()
 
 print(p2)
@@ -262,7 +261,7 @@ ggsave("./02_activities/data/p2_plotA1.png", plot = p2, width = 7, height = 5, d
 
 (vii) Which model fits better? Justify your answer.
          
-The additive model fits better for this SNP. The AIC value for the additive model (10988) is slightly lower than the AIC value for the recessive model (11000). In addition, the additive model shows that the aa genotype has a case phenotype frequency less than 1.0 with only an n=14. When using recessive coding, the "0" includes heterozygotes which pushes that phenotypic frequency much higher than in the additive model. This could be inflating the influence of the aa genotype by combining it with the heterozygotes which have a higher phenotypic frequency when viewed through the additive model.
+The additive model fits better for this SNP. The AIC value for the additive model (11277) is slightly lower than the AIC value for the recessive model (11292) which indicates a better fit. In addition, the additive model shows that the aa genotype has phenotypic values less than 1.0 with only an n=15. When using recessive coding, the "0" includes heterozygotes which pushes that phenotypic frequency much higher than in the additive model. This could be inflating the influence of the aa genotype by combining it with the heterozygotes which have a higher phenotypic frequency when viewed through the additive model. It also underestimates the influence of the Aa genotype which, when seen in the additive model, does have higher phenotypic values than the aa genotype. When observing the linear regression line, the recessive model indicates that having aa or Aa genotype is associated with a 0 phenotype value and a genotype of AA is associated with a ~0.5 phenotype value. In contrast, the additive model shows that heterozygotes have an increased risk compared to aa homozygotes and AA homozygotes have a phenotype value of approximately 2. This shows a gradual increase in risk compared to the recessive model that potentially underestimates the influence of the Aa genotype. 
 
 
 ### Criteria
