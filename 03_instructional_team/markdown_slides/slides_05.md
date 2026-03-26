@@ -19,11 +19,9 @@ $ echo "Data Sciences Institute"
 - **Discoveries at scale:** 
   - How to control error rates across millions of tests (Bonferroni genome-wide threshold, FDR). 
 - **Combine evidence across studies:** 
-  - GWAS meta-analysis (combine $p$-values or effect sizes; fixed vs. random effects) 
-  - how to interpret heterogeneity.
-
+  - GWAS meta-analysis (combine effect sizes; fixed vs. random effects) 
 -----
-
+<!--
 # Regression Approach
 
 - Generalized linear models (GLMs)
@@ -40,10 +38,10 @@ $$
 H_0: \beta=0
 $$
 
-- Can use likelihood ratio tests or score tests to test $H_0$
+- Can use Wald test to test $H_0$
 - Main advantage: it allows incorporation of covariates
-
-----
+-----
+-->
 
 # Mixed Effect models
 
@@ -57,22 +55,26 @@ $$
 
 - Mixed model extension: $Y=X \beta+C \alpha+u+\varepsilon$
 
-  - $u$ : genetic random effects (heritability component)
+  - $u$ : genetic random effects
   - $\varepsilon$ : residual, non-heritable variation
 - Assumptions on random effects: $E(u)=0, \quad \operatorname{Var}(u)=\sigma_g^2 K.$
 
+- In practice, $K$ is approximated as $K=G G^T / M$, where $G$ is the genotype matrix constructed from all $M$ SNPs.
+- Alternatively,$K$ can be estimated from family pedigree data.
+
+<!--
 - Genetic covariance matrix: $K=\frac{G G^T}{M}$
   - $G: N \times M$ genotype matrix; $N$ : number of individuals; $M$ : number of SNPs.
 - In GWAS, both $N$ and $M$ are very large $\rightarrow$ requires efficient methods
+-->
 -----
 
 # Linear Mixed Models (LMM)
 
 - $K$ captures genetic relatedness, including population structure, family relationships, and hidden relatedness
-- $\sigma_g^2$:genetic variance parameter we aim to estimate
+- $\sigma_g^2$: genetic variance parameter we aim to estimate
 - Estimation methods: REML (Restricted Maximum Likelihood) or AI-REML (Average Information REML)
 - LMMs also allow us to estimate the individual random effects($\mu$)
-
 
 -----
 
@@ -85,18 +87,12 @@ $$
 Y=C \alpha+u+\varepsilon
 $$
 
-  - We can regress out the effects of covariates:
-
-$$
-\tilde{Y}=u+\varepsilon
-$$
-
   - $E(u)=0, \operatorname{Var}(u)=\sigma_g^2 K, \operatorname{Var}(\varepsilon)=\sigma_e^2 I$
   - Using REML/AI-REML we can estimate $\widehat{\sigma_g^2}$ and $\widehat{\sigma_e^2}$.
   - We can also get BLUP (best linear unbiased predictors)
 
 $$
-\widehat{u}=\widehat{\mathrm{K}} \widehat{\sigma_g^2} \times \Sigma^{-1}\left(\mathrm{I}-\mathrm{C}\left(C^T \Sigma^{-1} \mathrm{C}\right)^{-1} C^T \Sigma^{-1}\right) \mathrm{Y}, \Sigma=\widehat{\sigma_g^2} \mathrm{~K}+\widehat{\sigma_e^2} \mathrm{I}.
+\widehat{u}=\mathrm{K} \widehat{\sigma_g^2} \times \Sigma^{-1}\left(\mathrm{I}-\mathrm{C}\left(C^T \Sigma^{-1} \mathrm{C}\right)^{-1} C^T \Sigma^{-1}\right) \mathrm{Y}, \Sigma=\widehat{\sigma_g^2} \mathrm{~K}+\widehat{\sigma_e^2} \mathrm{I}.
 $$
 
 
@@ -104,10 +100,10 @@ $$
 
 # Association testing in the LMM framework
 
-- STEP 2: test for association with each SNP $H_0: \beta=0$.
+- STEP 2: test for association with each SNP.  $H_0:\beta=0$.
 
 $$
-\widehat{\boldsymbol{Y}}_{\text {resid }}^{\star}=\widetilde{\boldsymbol{Y}}-\widehat{u} .
+\widehat{\boldsymbol{Y}}_{\text {resid }}^{\star}=\boldsymbol{Y}-\widehat{u}-C\hat{\alpha} .
 $$
 
 - Test for association in a linear (non-mixed) regression model
@@ -120,8 +116,19 @@ $$
 
 - STEP 2 is then repeated for millions of SNPs
 
-----
+-----
 
+# Heritability Estimation from GWAS
+
+- Variance decomposition: $Var(Y) = Var(G) + Var(\varepsilon)$
+
+- **Heritability:**$h^2 = \frac{Var(G)}{Var(Y)}$
+
+- Earlier: used **trait covariance among relatives** (no genotypes)  
+- Now: estimate heritability directly from **GWAS data**  
+- $\quad h^2=\frac{\widehat{\sigma_g^2}}{\sigma_Y^2}$
+
+-------
 
 # Efficient LMM Methods for GWAS
 
@@ -134,22 +141,9 @@ $$
 - Regenie (Nature genetics, 2021)
   - Software: https://rgcgithub.github.io/regenie/
 
-
------
-
-# Heritability Estimation from GWAS
-
-- Variance decomposition: $Var(Y) = Var(G) + Var(\varepsilon)$
-
-- **Heritability:**$h^2 = \frac{Var(G)}{Var(Y)}$
-
-- Earlier: used **trait covariance among relatives** (no genotypes)  
-- Now: estimate heritability directly from **GWAS data**  
-- Focus on **SNP heritability** → proportion of variance explained by common SNPs
-
 ---
 
-
+<!--
 # Heritability Estimation from GWAS
 
 $$
@@ -178,8 +172,8 @@ $$
 - Using REML/AI-REML to estimate $\widehat{\sigma_g^2}$
 - $\quad h^2=\frac{\widehat{\sigma_g^2}}{\sigma_Y^2}$
 
-
 -----
+<!---
 
 # Family-based Designs
 
@@ -196,14 +190,6 @@ $$
   - The tested marker is likely **linked** to the true disease locus  
 - In contrast, population-based designs may give false positives due to structure  
 #### Question: why is this robustness lost in population-based studies?  
-----
-
-# Indirect association
-
-- Genetic association studies typically test **markers**, not causal mutations  
-- A marker may be correlated with the true causal variant → this is **indirect association**  
-- **Linkage disequilibrium (LD)** (or correlation) between a marker and a causal locus (DSL) creates an apparent association with the phenotype 
-- Key idea: the marker is not causal, but **tags the causal variant** through LD  
 
 ----
 
@@ -216,10 +202,9 @@ $$
 - If there is a genotype–phenotype association:  
   - Expect **over- or under-transmission** of certain alleles from parents to offspring  
 ----
-<!--
 
 # Application of Mendel’s first law
--->
+------
 # The trio design and Transmission Disequilibrium Test (TDT)
 
 - Each parent has a transmitted allele and an untransmitted allele.
@@ -250,7 +235,6 @@ $$
 - Many extensions to handle other genetic models, missing data etc.
 - FBAT is a unified family-based approach, an extension of TDT to:
 - Missing parental genotypes, continuous phenotypes, time-to-onset, different genetic models.
-- www.biostat.harvard.edu/~fbat/fbat.htm
 
 ----
 
@@ -262,7 +246,7 @@ $$
 \begin{aligned}
 U & =\sum_{\substack{\text { family } i, \\
 \text { offspring } j}} Y_{i j}\left(X_{i j}-E\left(X_{i j} \mid P_i\right)\right) \\
-Z & =\frac{U}{\sqrt{\operatorname{Var}(U)}} \sim N(0,1)
+Z & =\frac{U}{\sqrt{\operatorname{Var}(U)}} \sim N(0,1) ~\text{under} H_{0}
 \end{aligned}
 $$
 
@@ -278,9 +262,11 @@ $$
 1. What is the alternative hypothesis for a TDT test (or any FBAT test), and how does that compare with the alternative of a test of association from a case-control or cohort study? Why is this important from a practical perspective?
 2. The TDT is a conditional test. What are the random variables used in computing the null distribution of the test, and what variables are being conditioned on?
 
-
-
 -----
+
+--->
+
+
 ## Complications when testing association with millions of markers in large GWAS studies
 
 - So far, we have discussed one test/one genetic marker at a time.
@@ -305,7 +291,7 @@ $$
 # Multiple Testing
 
 - Multiple testing issues arise when many markers are tested as in GWAS.
-- Major statistical problem as it leads to loss of power, and increased false positive rates if not accounted for.
+- Major statistical problem as it leads to increased false positive rates if not accounted for.
 - Idea: Test each marker separately and adjust the significance level of each test.
 
 
@@ -332,18 +318,40 @@ $H_0(m)$ : no association between the $m$-th SNP and the phenotype.
 
 # Bonferroni method
 
-- **FWER (family-wise error rate)** or experiment-wise error rate:
+- **FWER (family-wise error rate)**:
 $$
 F W E R=P\left(\text { reject at least one } H_0(m) \mid H_0(m) \text { is true for all } m\right)
 $$
 <br>
 
-- **Bonferroni**: fix $F W E R=\alpha$ and set individual significance levels at $\frac{\alpha}{M}$.
+- **Bonferroni correction**: fix $F W E R=\alpha$ and set individual significance levels at $\frac{\alpha}{M}$.
 - This ensures that the FWER is less than the desired level $\alpha$ (e.g. 0.05).
-- If markers are not independent (due to linkage disequilibrium) the Bonferroni adjustment is conservative.
-- E.g. extreme case: only one independent marker among $M$ and the true FWER is $\frac{\alpha}{M}$.
+- Bonferroni correction is conservative if markers are not independent (due to linkage disequilibrium).
 
 -----
+
+# Bonferroni correction
+
+```r
+
+# Desired family-wise error rate (FWER)
+alpha <- 0.05
+
+# Input p-values
+p <- c(0.002, 0.01, 0.02, 0.03, 0.20)
+
+# Total number of tests
+M <- length(p)
+
+# Bonferroni significance cutoff
+alpha / M
+
+# Test which p-values remain significant
+p < alpha / M
+
+# [1]  TRUE FALSE FALSE FALSE FALSE
+```
+----
 
 # Bonferroni threshold for GWAS
 
@@ -358,7 +366,6 @@ $$
 - Rather than control the Type-1 error, FDR limits the expected number of null-hypotheses that are rejected incorrectly.
 - FDR=5\% means that on average 5\% of the SNPs we rejected are in fact false positives.
 - FDR is less conservative than FWER $\rightarrow$ higher power.
-- FDR is less accepted in the GWAS setting, but useful for GWAS where results are followed up.
 
 
 -----
@@ -389,7 +396,7 @@ $$
 - For a specified FDR level (e.g. 0.05), compare
 
 $$
-p_{(i)} \leq \frac{i}{m} F D R
+\frac{M}{i}p_{(i)} \leq F D R
 $$
 
 - Find largest $i$ for which this inequality holds, and then reject tests that correspond to $1, \ldots, i$.
@@ -397,23 +404,42 @@ $$
 
 -----
 
+# Benjamini-Hochberg (BH) procedure
 
-# Example
+```r
 
-<small>
+# target false discovery rate (FDR)
+alpha <- 0.05                  
 
-| $i$ | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
-| :---: | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| $p_{(i)}$ | 0.002 | 0.005 | 0.006 | 0.008 | 0.009 | 0.009 | 0.017 | 0.025 | 0.105 | 0.54 |
-| $10 \frac{p_{(i)}}{i}$ | 0.02 | 0.022 | 0.02 | 0.02 | 0.017 | 0.015 | 0.025 | 0.031 | 0.11 | 0.54|
+# Input p-values
+p <- c(0.002, 0.01, 0.02, 0.03, 0.20)
 
-</small>
-FDR = 5% reject hypotheses 1-8 –> more than Bonferroni that rejects only two.
+# BH-adjusted p-values
+p_bh <- p.adjust(p, method = "BH")
 
+
+# Which tests are significant after BH correction?
+p_bh < alpha
+
+# [1]  TRUE  TRUE  TRUE  TRUE FALSE
+````
 
 -----
 
-# Meta-analysis
+# Exercise
+
+We have p-values from 10 hypothesis tests:
+
+```r
+p <- c(0.002, 0.005, 0.006, 0.008, 0.009, 0.009, 0.017, 0.025, 0.105, 0.54)
+
+```
+
+At significance level $\alpha=0.05$:
+
+- Which tests are rejected using the Bonferroni correction?
+
+- Which tests are rejected using the Benjamini–Hochberg (BH) procedure?
 
 
 ----
@@ -426,7 +452,7 @@ FDR = 5% reject hypotheses 1-8 –> more than Bonferroni that rejects only two.
 - Purpose: to combine information from multiple independent studies.
 
 -----
-
+<!---
 # Meta-analysis
 
 - Combines information from multiple independent studies.
@@ -435,12 +461,11 @@ FDR = 5% reject hypotheses 1-8 –> more than Bonferroni that rejects only two.
 - Methods:
   - Combine $p$-values or Z-scores (e.g., Fisher's method).
   - Combine effect sizes.
-
 ----
 
 # Combine p-values or Z-scores
 
-- Combine p -values $p_{m k}$ for variant $m$ and stage $k$ using **Fisher's method**:
+- Combine p -values $p_{m k}$ for variant $m$ and study $k$ using **Fisher's method**:
 
 $$
 X_{2 K}^2=-2 \sum_{k=1}^K \ln \left(p_{m k}\right) \sim \chi_{2 K}^2.
@@ -452,7 +477,17 @@ $$
 $$
 Z_m=\left(\frac{1}{\sqrt{\sum_k n_k}} \sum_k \sqrt{n_k} Z_{m k}\right) \sim N(0,1).
 $$
+----
+--->
 
+# Meta-analysis
+
+- Combines information from multiple independent studies.
+- Increases statistical power by boosting sample size.
+- Helps assess consistency of findings across datasets.
+- Methods:
+  - Fixed-effects meta-analysis
+  - Random-effects meta-analysis
 -----
 
 # Fixed-effects meta-analysis
@@ -462,16 +497,6 @@ $$
 - **Combined effect estimates the fixed effect size (the same underlying parameter across studies)**.
 - Might be realistic if, for example, the studies have all been conducted in the same population, consistently measured phenotypes, same inclusion criteria etc.
 - In practice, that may not be true.
-
-----
-
-# Random-effects meta analysis
-
-Random-effects meta-analysis.
-- True effect size may vary from study to study (so there is a study-specific true effect).
-- Observed effect size in each study varies due to both random error and differences in true effect sizes across studies.
-- **Combined effect estimates the mean of the distribution of true effects**.
-
 
 -----
 
@@ -498,10 +523,36 @@ $$
 
 - Larger studies are given higher weight compared with smaller studies. So if one very large study and other small studies, the large study will dominate.
 
-
-
 -----
 
+# Fixed-effect meta-analysis
+
+```r
+# Load package
+library(metafor)
+
+# Example study estimates and standard errors
+beta  = c(0.05, 0.12, 0.18, 0.40, 0.52, 0.60)
+se    = c(0.04, 0.05, 0.04, 0.05, 0.04, 0.05)
+
+```
+
+```r
+# Fixed-effect meta-analysis
+res_fe <- rma(yi = beta, sei = se, method = "FE")
+summary(res_fe)
+
+```
+-----
+
+# Random-effects meta analysis
+
+Random-effects meta-analysis.
+- True effect size may vary from study to study (so there is a study-specific true effect).
+- Observed effect size in each study varies due to both random error and differences in true effect sizes across studies.
+- **Combined effect estimates the mean of the distribution of true effects**.
+
+------
 # Random-effect model
 
 - In the RE model, we assume that the true effects $\beta_i=\beta+ \xi_i, \xi_i \sim N\left(0, \tau^2\right)$.
@@ -516,7 +567,6 @@ $$
 - $$
   \hat{\beta} \sim \mathrm{N}\left(\beta,\left(\sum_{i=1}^K w_i^*\right)^{-1}\right).$$
 
-
 ----
 
 # Random-effect model
@@ -527,8 +577,22 @@ $$
 - How to estimate the between-study variance $\hat{\tau}^2$ ?
 - Many different methods, e.g. DerSimonian and Laird (DL)
 
-
 -----
+
+```r
+# Load package
+library(metafor)
+
+# Example study estimates and standard errors
+beta  = c(0.05, 0.12, 0.18, 0.40, 0.52, 0.60)
+se    = c(0.04, 0.05, 0.04, 0.05, 0.04, 0.05)
+```
+
+```r 
+# Random-effects meta-analysis
+rma(yi = beta, sei = se, method = "REML")
+```
+------
 
 # Fixed vs. Random Effect model
 
@@ -536,14 +600,18 @@ $$
 - **Fixed effect meta-analysis is typically used in genetics**, without regard to heterogeneity.
 - Random effect meta-analysis is typically too conservative (less powerful).
 
-
-----
+- Other GWAS meta-analysis tools
+  - [METAL](https://github.com/statgen/METAL?tab=readme-ov-file): fixed-effect only
+  - [GWAMA](https://genomics.ut.ee/en/tools): fixed-effect and random-effects
+  
+-----
 
 ### Meta-analysis of three GWAS studies assessing the link between the FTO rs8050136 variant and type 2 diabetes
 
 ![Sales Figure, w:700](./images/GWAS3.png) 
 
------
+-------
+
 
 # What's Next
 
