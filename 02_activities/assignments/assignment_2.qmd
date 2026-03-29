@@ -1,13 +1,14 @@
 ---
 title: "Assignment #2"
-output: html
+format: html
+embed-resources: true
 knitr:
   opts_chunk:
     engine.path: "C:/Program Files/Git/usr/bin/bash.exe"
 ---
 
 ```{r setup, include=FALSE}
-#knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = normalizePath("../../"))
 library(data.table)
 library(qqman)
@@ -109,7 +110,23 @@ assoc_add <- assoc[TEST == "ADD"]
 
 setnames(assoc_add, c("#CHROM","POS","ID"), c("CHR","BP","SNP"))
 
-png("./02_activities/data/manhattan_plot.png", width = 1200, height = 800, res = 150)
+manhattan(assoc_add,
+          chr = "CHR",
+          bp  = "BP",
+          snp = "SNP",
+          p   = "P",
+          xlab = "",
+          ylab = "",
+          suggestiveline = FALSE,
+          cex.axis = 1.5,
+          col = c("lightblue", "lightslateblue"))
+
+dev.off()
+```
+
+```{r}
+#I wasn't sure if I needed to have the figures as png's or just embedded in the html file, so just did both. I wasn't sure how to do it more cleanly.
+png("02_activities/data/manhattan_plot.png", width = 1200, height = 800, res = 150)
 
 manhattan(assoc_add,
           chr = "CHR",
@@ -121,16 +138,21 @@ manhattan(assoc_add,
           suggestiveline = FALSE,
           cex.axis = 1.5,
           col = c("lightblue", "lightslateblue"))
+
 dev.off()
 ```
 
 (iii) Create a QQ plot of the GWAS p-values.
-
+```{r}
+qq(assoc_add$P, main = "Q-Q plot of GWAS p-values")
+dev.off()
+```
 ```{r}
 png("./02_activities/data/QQ_plot.png", width = 1200, height = 800, res = 150)
 qq(assoc_add$P, main = "Q-Q plot of GWAS p-values")
 dev.off()
 ```
+
 
 ### Criteria
 
