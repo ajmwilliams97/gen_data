@@ -195,6 +195,7 @@ manhattan(assoc_add,
           cex.axis = 1.5,
           col = c("lightblue", "lightslateblue"))
 dev.off()
+<img src="./02_activities/data/manhattan_plot.png" alt="Description">
 ```
 
 ```{r}
