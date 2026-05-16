@@ -1,0 +1,25 @@
+PLINK v2.0.0-a.7 64-bit (10 Jan 2026)
+Options in effect:
+  --bfile ./02_activities/data/gwa.qc.A1
+  --export A
+  --extract ./02_activities/data/snplist.txt
+  --freq
+
+Hostname: SHE-RA
+Working directory: C:\Users\amand\OneDrive - Dalhousie University\Desktop\DSI Course\gen_data
+Start time: Sun Mar 15 23:32:45 2026
+
+Random number seed: 1773628365
+7973 MiB RAM detected; reserving 3986 MiB for main workspace.
+Using up to 8 compute threads.
+4000 samples (2000 females, 2000 males; 4000 founders) loaded from
+./02_activities/data/gwa.qc.A1.fam.
+101083 variants loaded from ./02_activities/data/gwa.qc.A1.bim.
+1 quantitative phenotype loaded (4000 values).
+--extract: 4 variants remaining.
+Calculating allele frequencies... done.
+--freq: Allele frequencies (founders only) written to plink2.afreq .
+4 variants remaining after main filters.
+--export A: plink2.raw written.
+
+End time: Sun Mar 15 23:32:45 2026
